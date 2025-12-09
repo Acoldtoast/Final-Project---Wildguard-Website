@@ -80,3 +80,26 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+class HelpTip(db.Model):
+    __tablename__ = 'help_tip'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    reason = db.Column(db.Text, nullable=False)
+    action = db.Column(db.Text, nullable=False)
+
+class RelatedArticle(db.Model):
+    __tablename__ = 'related_article'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(300), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    link = db.Column(db.String(500), nullable=False)
+    category = db.Column(db.String(50), nullable=False, default='General')  # e.g., 'General', 'Scientific', 'Policy'
+
+class News(db.Model):
+    __tablename__ = 'news'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(300), nullable=False)
+    summary = db.Column(db.Text, nullable=False)
+    link = db.Column(db.String(500), nullable=False)
+    category = db.Column(db.String(50), nullable=False, default='General')  # e.g., 'Success Story', 'Alert', 'Update'
+    published_date = db.Column(db.Date, nullable=True)
