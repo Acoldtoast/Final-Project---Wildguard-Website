@@ -1,7 +1,7 @@
 # wildguard/routes/animals.py
 
 from flask import Blueprint, render_template, current_app, flash, redirect, url_for
-from models import Species
+from models import Species, SpeciesFunFact
 
 animals = Blueprint('animals', __name__)
 
@@ -28,7 +28,7 @@ def animal_detail(species_id):
         current_species = Species.query.get_or_404(species_id)
         threat_list = current_species.threats.all()
         habitat_list = current_species.habitats.all()
-        fact_list = current_species.fun_facts.order_by('fact_id').all()
+        fact_list = current_species.fun_facts.order_by(SpeciesFunFact.__table__.c.fact_id).all()
 
         current_app.logger.info(f'Species detail page viewed: {current_species.name}')
 
