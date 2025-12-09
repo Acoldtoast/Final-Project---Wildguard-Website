@@ -1,54 +1,64 @@
-# wildguard/app.py
+# wildguard/forms.py
 
-from flask import Flask
-from flask_login import LoginManager
-from models import db, User 
-from routes.pages import pages
-from routes.auth import auth
-from routes.animals import animals
-from routes.admin import admin
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField, TextAreaField, SelectField, DateField
+from wtforms.validators import DataRequired, Length, Optional, URL
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secretkey123'  # Secret key helps keep sessions/forms safe
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///wildguard.db'  # Where our data will be saved
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Turns off unnecessary tracking
-    
-db.init_app(app)
-    
-login_manager = LoginManager()
-login_manager.login_view = 'auth.admin_login'
-login_manager.login_message = 'Please log in to access this page.'
-login_manager.login_message_category = 'info'
-login_manager.init_app(app)
-    
-@login_manager.user_loader
-def load_user(user_id):
-        return User.query.get(int(user_id))
-    
-app.register_blueprint(pages)
-app.register_blueprint(auth, url_prefix='/auth')
-app.register_blueprint(animals)
-app.register_blueprint(admin)
-    
-if __name__ == '__main__':
-    
-    with app.app_context():
-        db.create_all()
-        print("\n✓ Database tables created successfully!")
-        
-        admin_user = User.query.filter_by(username='Wildguardofficialadmin').first()
-        if not admin_user:
-            admin_user = User(username='Wildguardofficialadmin', is_admin=True)
-            admin_user.set_password('Wildguard2025adminonly')
-            db.session.add(admin_user)
-            db.session.commit()
-            print("✓ Admin user created: Wildguardofficialadmin")
-        else:
-            print("✓ Admin user already exists.")
-    
-    print("\n-------------------------------------------------")
-    print("🌿 WildGuard Server Starting...")
-    print("📍 Running at: http://127.0.0.1:5000")
-    print("-------------------------------------------------")
+# --- Authentication Forms ---
 
-    app.run(debug=True, host='127.0.0.1', port=5000)
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Login')
+
+# --- Species Management Form ---
+
+class SpeciesForm(FlaskForm):
+    name = StringField('Species Name', 
+                       validators=[DataRequired(), Length(max=100)])
+    scientific_name = StringField('Scientific Name', 
+                                  validators=[DataRequired(), Length(max=100)])
+    status = SelectField('Conservation Status', 
+                         validators=[DataRequired()])
+    population_estimate = StringField('Population Estimate', 
+                                      validators=[DataRequired(), Length(max=100)])
+    description = TextAreaField('Description', 
+                               validators=[DataRequired(), Length(min=50, max=5000)])
+    image_file = StringField('Image Filename', 
+                             validators=[Length(max=100)])
+    habitats = TextAreaField('Habitats (one per line)', 
+                             validators=[Optional(), Length(max=2000)])
+    threats = TextAreaField('Threats (one per line)', 
+                            validators=[Optional(), Length(max=2000)])
+    fun_facts = TextAreaField('Fun Facts (one per line)', 
+                              validators=[Optional(), Length(max=5000)])
+    submit = SubmitField('Save Species')
+
+# --- Related Article Form ---
+
+class RelatedArticleForm(FlaskForm):
+    title = StringField('Article Title', 
+                       validators=[DataRequired(), Length(max=300)])
+    description = TextAreaField('Description', 
+                               validators=[DataRequired(), Length(min=20, max=1000)])
+    link = StringField('Article URL', 
+                      validators=[DataRequired(), URL()])
+    category = SelectField('Category', 
+                          choices=[('General', 'General'), ('Scientific', 'Scientific'), ('Policy', 'Policy')],
+                          validators=[DataRequired()])
+    submit = SubmitField('Save Article')
+
+# --- News Form ---
+
+class NewsForm(FlaskForm):
+    title = StringField('News Title', 
+                       validators=[DataRequired(), Length(max=300)])
+    summary = TextAreaField('Summary', 
+                           validators=[DataRequired(), Length(min=20, max=1000)])
+    link = StringField('News URL', 
+                      validators=[DataRequired(), URL()])
+    category = SelectField('Category', 
+                          choices=[('Success Story', 'Success Story'), ('Alert', 'Alert'), ('Update', 'Update')],
+                          validators=[DataRequired()])
+    published_date = DateField('Published Date', validators=[Optional()])
+    submit = SubmitField('Save News')
