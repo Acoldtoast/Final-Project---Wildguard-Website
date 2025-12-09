@@ -23,8 +23,8 @@ def admin_required(f):
 def dashboard():
     species_list = Species.query.order_by(Species.id).all()
     organizations = Organization.query.order_by(Organization.org_id).all()
-    help_tips = HelpTip.query.order_by(HelpTip.id).all()
-    articles = RelatedArticle.query.order_by(RelatedArticle.id).all()
+    help_tips = HelpTip.query.order_by(HelpTip.__table__.c.help_id).all()
+    articles = RelatedArticle.query.order_by(RelatedArticle.__table__.c.article_id).all()
     news_items = News.query.order_by(News.published_date.desc()).all()
     return render_template("admin_dashboard.html", 
                          species_list=species_list,
@@ -50,10 +50,13 @@ def manage_species(id=None):
 
     species = Species.query.get(id) if id else None
     
+    # Always set status choices first, before form instantiation
+    status_choices = [(s.status_name, s.status_name) for s in ConservationStatus.query.all()]
+    
     if request.method == "GET" and species:
         habitats_text = "\n".join([h.habitat_location for h in species.habitats.all()])
         threats_text = "\n".join([t.threat_name for t in species.threats.all()])
-        facts_text = "\n".join([f.fact_detail for f in species.fun_facts.order_by('fact_id').all()])
+        facts_text = "\n".join([f.fact_detail for f in species.fun_facts.order_by(SpeciesFunFact.fact_id).all()])
         form = SpeciesForm(obj=species)
         form.habitats.data = habitats_text
         form.threats.data = threats_text
@@ -61,7 +64,7 @@ def manage_species(id=None):
     else:
         form = SpeciesForm(obj=species)
 
-    form.status.choices = [(s.status_name, s.status_name) for s in ConservationStatus.query.all()]
+    form.status.choices = status_choices
 
     if form.validate_on_submit():
         if not species:
@@ -84,7 +87,7 @@ def manage_species(id=None):
         flash("Saved successfully.", "success")
         return redirect(url_for("admin.dashboard"))
 
-    return render_template("admin_edit.html", form=form, species=species)
+    return render_template("admin_edit.html", form=form, species=species, item_type="Species")
 
 
 @admin.route("/admin/delete/<int:id>", methods=["POST"])
@@ -153,7 +156,7 @@ def delete_organization(id):
 @admin.route("/admin/help-tips")
 @admin_required
 def manage_help_tips():
-    help_tips = HelpTip.query.order_by(HelpTip.id).all()
+    help_tips = HelpTip.query.order_by(HelpTip.__table__.c.help_id).all()
     return render_template("admin_help_tips.html", help_tips=help_tips)
 
 
@@ -202,7 +205,7 @@ def delete_help_tip(id):
 @admin.route("/admin/articles")
 @admin_required
 def manage_articles():
-    articles = RelatedArticle.query.order_by(RelatedArticle.id).all()
+    articles = RelatedArticle.query.order_by(RelatedArticle.__table__.c.article_id).all()
     return render_template("admin_articles.html", articles=articles)
 
 
@@ -245,7 +248,8 @@ def delete_article(id):
 @admin.route("/admin/news")
 @admin_required
 def manage_news():
-    news_items = News.query.order_by(News.id.desc()).all()
+    # order news by published_date (more meaningful) — fall back to news_id column if needed
+    news_items = News.query.order_by(News.published_date.desc()).all()
     return render_template("admin_news.html", news_items=news_items)
 
 
