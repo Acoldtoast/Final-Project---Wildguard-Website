@@ -5,6 +5,8 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 db = SQLAlchemy()
 
+# --- DATABASE TABLES (7-Table Normalized Design) ---
+
 class ConservationStatus(db.Model):
     __tablename__ = 'conservation_status'
     status_name = db.Column(db.String(50), primary_key=True)
@@ -82,14 +84,14 @@ class User(db.Model, UserMixin):
 
 class HelpTip(db.Model):
     __tablename__ = 'help_tip'
-    id = db.Column(db.Integer, primary_key=True)
+    help_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(100), nullable=False)
     reason = db.Column(db.Text, nullable=False)
     action = db.Column(db.Text, nullable=False)
 
 class RelatedArticle(db.Model):
     __tablename__ = 'related_article'
-    id = db.Column(db.Integer, primary_key=True)
+    article_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(300), nullable=False)
     description = db.Column(db.Text, nullable=False)
     link = db.Column(db.String(500), nullable=False)
@@ -97,7 +99,7 @@ class RelatedArticle(db.Model):
 
 class News(db.Model):
     __tablename__ = 'news'
-    id = db.Column(db.Integer, primary_key=True)
+    news_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(300), nullable=False)
     summary = db.Column(db.Text, nullable=False)
     link = db.Column(db.String(500), nullable=False)
