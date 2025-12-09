@@ -29,7 +29,7 @@ def donate():
 
 @pages.route("/articles")
 def articles():
-    all_articles = RelatedArticle.query.order_by(RelatedArticle.id).all()
+    all_articles = RelatedArticle.query.order_by(RelatedArticle.__table__.c.article_id).all()
     return render_template('articles.html', title='Resources & Articles', articles=all_articles)
 
 @pages.route("/news")
