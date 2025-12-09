@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+env/
+
+# IDE files
+.vscode/
+.idea/
+
+# SQLite database
+wildguard.db
+
+# Flask instance folder
+instance/
+
+# OS files
+.DS_Store
