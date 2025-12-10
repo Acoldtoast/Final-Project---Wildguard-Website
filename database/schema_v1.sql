@@ -1,5 +1,4 @@
--- schema.sql
--- SQLite schema generated to match models.py
+
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS conservation_status (
