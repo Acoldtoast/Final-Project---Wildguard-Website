@@ -33,7 +33,6 @@ def admin_login():
             
     return render_template('admin_login.html', title='Admin Login', form=form)
 
-
 @auth.route("/logout")
 @login_required
 def logout():

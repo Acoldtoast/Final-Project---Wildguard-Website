@@ -1,15 +1,16 @@
 # wildguard/routes/animals.py
 
 from flask import Blueprint, render_template, current_app, flash, redirect, url_for
-from models import Species, SpeciesFunFact
+from models import Species, SpeciesFunFact, Location, HabitatType, Threat
+from types import SimpleNamespace
 
 animals = Blueprint('animals', __name__)
-
 
 @animals.route("/wildlife")
 def list_animals():
     try:
-        all_species = Species.query.order_by(Species.status_name, Species.name).all()
+        # Order by species name (status_name was removed in favor of status relationship)
+        all_species = Species.query.order_by(Species.name).all()
 
         if not all_species:
             flash('No species found in the database. Please check back later.', 'info')
@@ -26,8 +27,17 @@ def list_animals():
 def animal_detail(species_id):
     try:
         current_species = Species.query.get_or_404(species_id)
-        threat_list = current_species.threats.all()
-        habitat_list = current_species.habitats.all()
+        # Build friendly lists for template using normalized tables
+        threat_list = []
+        for t in current_species.threats.all():
+            th = Threat.query.get(t.threat_id)
+            threat_list.append(SimpleNamespace(threat_name=(th.threat_name if th else '')))
+
+        habitat_list = []
+        for h in current_species.habitats.all():
+            loc = Location.query.get(h.location_id)
+            hab = HabitatType.query.get(h.habitat_type_id)
+            habitat_list.append(SimpleNamespace(habitat_location=(f"{loc.location_name} | {hab.habitat_name}" if loc and hab else '')))
         fact_list = current_species.fun_facts.order_by(SpeciesFunFact.__table__.c.fact_id).all()
 
         current_app.logger.info(f'Species detail page viewed: {current_species.name}')

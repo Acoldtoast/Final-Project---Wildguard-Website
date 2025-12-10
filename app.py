@@ -23,7 +23,7 @@ login_manager.init_app(app)
     
 @login_manager.user_loader
 def load_user(user_id):
-        return User.query.get(int(user_id))
+        return User.query.filter_by(user_id=int(user_id)).first()
     
 app.register_blueprint(pages)
 app.register_blueprint(auth, url_prefix='/auth')

@@ -2,7 +2,9 @@
 
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
-from models import db, Species, SpeciesHabitat, SpeciesThreat, SpeciesFunFact, ConservationStatus, Organization, HelpTip, RelatedArticle, News
+from models import (db, Species, SpeciesHabitat, SpeciesThreat, SpeciesFunFact,
+                    ConservationStatus, Organization, HelpTip, HelpTipAction,
+                    RelatedArticle, News, Location, HabitatType, Threat, OrganizationSupports)
 from forms import SpeciesForm, RelatedArticleForm, NewsForm
 from functools import wraps
 
@@ -34,12 +36,56 @@ def dashboard():
                          news_items=news_items)
     
 def update_list(table, species_id, items, column, max_length=None):
+    # Remove existing entries for species
     table.query.filter_by(species_id=species_id).delete()
-    if items:
-        for item in items.splitlines():
-            item = item.strip()
+    if not items:
+        return
+
+    for item in items.splitlines():
+        item = item.strip()
+        if not item:
+            continue
+
+        # SpeciesHabitat expects a "Location | HabitatType" format (or "Location - HabitatType").
+        if table is SpeciesHabitat:
+            # Parse possible separators
+            if '|' in item:
+                loc_name, hab_name = [p.strip() for p in item.split('|', 1)]
+            elif '-' in item:
+                loc_name, hab_name = [p.strip() for p in item.split('-', 1)]
+            elif ':' in item:
+                loc_name, hab_name = [p.strip() for p in item.split(':', 1)]
+            else:
+                loc_name = item
+                hab_name = 'General'
+
+            loc = Location.query.filter_by(location_name=loc_name).first()
+            if not loc:
+                loc = Location(location_name=loc_name)
+                db.session.add(loc)
+                db.session.flush()
+
+            hab = HabitatType.query.filter_by(habitat_name=hab_name).first()
+            if not hab:
+                hab = HabitatType(habitat_name=hab_name)
+                db.session.add(hab)
+                db.session.flush()
+
+            db.session.add(SpeciesHabitat(species_id=species_id, location_id=loc.location_id, habitat_type_id=hab.habitat_type_id))
+
+        # SpeciesThreat expects plain threat names (one per line)
+        elif table is SpeciesThreat:
+            threat = Threat.query.filter_by(threat_name=item).first()
+            if not threat:
+                threat = Threat(threat_name=item)
+                db.session.add(threat)
+                db.session.flush()
+            db.session.add(SpeciesThreat(species_id=species_id, threat_id=threat.threat_id))
+
+        # Default handling (SpeciesFunFact etc.)
+        else:
             if (not max_length) or len(item) <= max_length:
-                kwargs = { "species_id": species_id, column: item }
+                kwargs = {"species_id": species_id, column: item}
                 db.session.add(table(**kwargs))
 
 
@@ -54,8 +100,16 @@ def manage_species(id=None):
     status_choices = [(s.status_name, s.status_name) for s in ConservationStatus.query.all()]
     
     if request.method == "GET" and species:
-        habitats_text = "\n".join([h.habitat_location for h in species.habitats.all()])
-        threats_text = "\n".join([t.threat_name for t in species.threats.all()])
+        # Build habitats as "Location | HabitatType"
+        habitats_text = "\n".join([
+            f"{(Location.query.get(h.location_id).location_name if Location.query.get(h.location_id) else '')} | {(HabitatType.query.get(h.habitat_type_id).habitat_name if HabitatType.query.get(h.habitat_type_id) else '')}"
+            for h in species.habitats.all()
+        ])
+        # Build threats from Threat table
+        threats_text = "\n".join([
+            (Threat.query.get(t.threat_id).threat_name if Threat.query.get(t.threat_id) else '')
+            for t in species.threats.all()
+        ])
         facts_text = "\n".join([f.fact_detail for f in species.fun_facts.order_by(SpeciesFunFact.fact_id).all()])
         form = SpeciesForm(obj=species)
         form.habitats.data = habitats_text
@@ -73,7 +127,13 @@ def manage_species(id=None):
 
         species.name = form.name.data
         species.scientific_name = form.scientific_name.data
-        species.status_name = form.status.data
+        # status field holds the status_name; convert to status_id
+        status = ConservationStatus.query.filter_by(status_name=form.status.data).first()
+        if status:
+            species.status_id = status.status_id
+        else:
+            # fallback: leave unchanged
+            pass
         species.population_estimate = form.population_estimate.data
         species.description = form.description.data
         species.image_file = form.image_file.data
@@ -165,28 +225,47 @@ def manage_help_tips():
 @admin_required
 def edit_help_tip(id=None):
     tip = HelpTip.query.get(id) if id else None
-    
+    # On GET, build a newline-separated actions string for the textarea
+    if request.method == "GET" and tip:
+        actions_text = "\n".join([a.action_text for a in tip.actions.order_by(HelpTipAction.action_id).all()])
+        # temporarily attach for template rendering
+        tip.action = actions_text
+
     if request.method == "POST":
         title = request.form.get('title')
         reason = request.form.get('reason')
-        action = request.form.get('action')
-        
-        if not title or not reason or not action:
+        actions_raw = request.form.get('action')
+
+        if not title or not reason or not actions_raw:
             flash("Please fill in all required fields.", "danger")
             return redirect(url_for("admin.manage_help_tips"))
-        
+
         if not tip:
-            tip = HelpTip(title=title, reason=reason, action=action)
+            tip = HelpTip(title=title, reason=reason)
             db.session.add(tip)
+            db.session.commit()  # commit to get help_id for actions
         else:
             tip.title = title
             tip.reason = reason
-            tip.action = action
-        
+            db.session.add(tip)
+            db.session.commit()
+
+        # Replace existing actions with provided ones
+        HelpTipAction.query.filter_by(tip_id=tip.help_id).delete()
+        for line in actions_raw.splitlines():
+            text = line.strip()
+            if not text:
+                continue
+            # allow lines starting with "* "
+            if text.startswith('* '):
+                text = text[2:].strip()
+            if text:
+                db.session.add(HelpTipAction(tip_id=tip.help_id, action_text=text))
+
         db.session.commit()
         flash("Help tip saved successfully.", "success")
         return redirect(url_for("admin.manage_help_tips"))
-    
+
     return render_template("admin_edit.html", item=tip, item_type="Help Tip")
 
 
