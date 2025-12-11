@@ -10,11 +10,11 @@ INSERT INTO conservation_status (status_id, status_name, description) VALUES
 
 -- 2) Locations (unique location names)
 INSERT INTO location (location_name) VALUES
-('Mindanao'),('Luzon'),('Leyte'),('Samar'),('Mindoro Island'),('Mindoro'),('Bohol'),('Balabac (Palawan)'),('Palawan'),('Panay'),('Negros'),('Northern Palawan'),('Dumaran Island'),('Central Cebu (Nug-as Forest)'),('Ilin Island (south of Mindoro)'),('Dinagat Island'),('Northern Luzon (Sierra Madre)'),('Southern Luzon (Quezon, Bicol)'),('Tawi-Tawi (Sulu Archipelago)'),('Panay Island');
+('Mindanao'),('Luzon'),('Leyte'),('Samar'),('Mindoro Island'),('Bohol'),('Panay'),('Negros'),('Balabac (Palawan)'),('Palawan'),('Northern Palawan'),('Dumaran Island'),('Panay Island'),('Tawi-Tawi (Sulu Archipelago)'),('Mindoro'),('Dinagat Island'),('Northern Luzon (Sierra Madre)'),('Southern Luzon (Quezon, Bicol)'),('Central Cebu (Nug-as Forest)'),('Ilin Island (south of Mindoro)');
 
 -- 3) Habitat types (unique habitat names)
 INSERT INTO habitat_type (habitat_name) VALUES
-('Dense mountain forests'),('Mountain forests'),('Grasslands'),('Forests'),('Lowland forests'),('Dense rainforests'),('Lowland rainforests'),('Forested lowlands'),('Limestone forests'),('Freshwater streams'),('Primary forests (mid- to high-elevation)'),('Mangroves'),('Riverine woodlands'),('Mossy forests'),('Forest remnants'),('Primary rainforests'),('Forest canopies'),('Forest patches'),('Mid-elevation forests');
+('Dense mountain forests'),('Mountain forests'),('Grasslands'),('Forests'),('Lowland forests'),('Dense rainforests'),('Lowland rainforests'),('Forested lowlands'),('Limestone forests'),('Freshwater streams'),('Primary forests (mid- to high-elevation)'),('Mangroves'),('Riverine woodlands'),('Primary rainforests'),('Forest patches'),('Mid-elevation forests'),('Forest canopies'),('Mossy forests'),('Forest remnants');
 
 -- 4) Threats (complete list - FIXED)
 INSERT INTO threat (threat_name) VALUES
@@ -30,25 +30,26 @@ INSERT INTO threat (threat_name) VALUES
 ('Wildlife trafficking'),
 ('Illegal wildlife trade'),
 ('Poaching'),
-('Poaching for bushmeat'),
+('Forest conversion for agriculture'),
 ('Habitat fragmentation'),
 ('Illegal trapping'),
+('Habitat destruction'),
 ('Water pollution'),
+('Poaching for bushmeat'),
 ('Logging'),
 ('Nest poaching'),
+('Hunting'),
 ('Nest disturbance'),
-('Mining'),
-('Limited distribution'),
-('Disturbance of roosting sites'),
-('Habitat destruction'),
-('Extremely limited forest cover'),
-('Extremely limited range'),
-('Forest conversion for agriculture'),
-('Forest conversion'),
 ('Severe habitat loss'),
 ('Extreme deforestation'),
+('Forest conversion'),
+('Disturbance of roosting sites'),
+('Mining'),
+('Limited distribution'),
 ('Forest degradation'),
-('Hunting');
+('Forest fragmentation'),
+('Extremely limited forest cover'),
+('Extremely limited range');
 
 -- 5) Species (20 entries)
 INSERT INTO species (id, name, scientific_name, population_estimate, description, image_file, status_id) VALUES
