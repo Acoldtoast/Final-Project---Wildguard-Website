@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Manage News — WildGuard{% endblock %}
+
+{% block content %}
+	<section class="hero">
+		<h2>Manage News</h2>
+		<p class="muted">Add, edit, or remove news and updates.</p>
+	</section>
+
+	<section>
+		<div class="admin-header">
+			<h3>News Items</h3>
+			<a href="{{ url_for('admin.edit_news') }}" class="btn">+ Add New News Item</a>
+		</div>
+
+		{% if news_items %}
+			<table class="admin-table">
+				<thead>
+					<tr>
+						<th>Title</th>
+						<th>Category</th>
+						<th>Published Date</th>
+						<th>Summary</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for news in news_items %}
+					<tr>
+						<td><strong>{{ news.title }}</strong></td>
+						<td><span class="badge">{{ news.category }}</span></td>
+						<td>{{ news.published_date.strftime('%B %d, %Y') if news.published_date else 'N/A' }}</td>
+						<td>{{ news.summary[:80] }}...</td>
+						<td>
+							<a href="{{ url_for('admin.edit_news', id=news.news_id) }}" class="btn btn-small">Edit</a>
+							<form method="POST" action="{{ url_for('admin.delete_news', id=news.news_id) }}" class="inline-form">
+								<button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Delete this news item?')">Delete</button>
+							</form>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		{% else %}
+			<p class="muted">No news items found. <a href="{{ url_for('admin.edit_news') }}">Add one now</a>.</p>
+		{% endif %}
+	</section>
+
+{% endblock %}
