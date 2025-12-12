@@ -2,10 +2,10 @@
 
 from flask import Flask
 from flask_login import LoginManager
-from models import db, User 
+from models import db, User
+from routes.animals import animals, get_site_stats
 from routes.pages import pages
 from routes.auth import auth
-from routes.animals import animals
 from routes.admin import admin
 
 app = Flask(__name__)
@@ -20,6 +20,15 @@ login_manager.login_view = 'auth.admin_login'
 login_manager.login_message = 'Please log in to access this page.'
 login_manager.login_message_category = 'info'
 login_manager.init_app(app)
+
+
+@app.context_processor
+def inject_site_stats():
+    try:
+        stats = get_site_stats()
+    except Exception:
+        stats = {}
+    return {'site_stats': stats}
     
 @login_manager.user_loader
 def load_user(user_id):
