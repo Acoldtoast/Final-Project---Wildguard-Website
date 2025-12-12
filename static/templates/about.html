@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="hero-section">
+        <h1>About WildGuard</h1>
+        <p>Protecting the world's most endangered wildlife through education and action</p>
+    </div>
+
+    <section class="stats-section">
+        <div class="stats-header-box">
+            <h2>Statistics of our website</h2>
+        </div>
+        <div class="stats-container">
+            <div class="stat-box">
+                <h3>Species by Status</h3>
+                <ul>
+                {% for status, count in site_stats.by_status %}
+                    <li>{{ status }} — {{ count }}</li>
+                {% else %}
+                    <li>No data available</li>
+                {% endfor %}
+                </ul>
+            </div>
+
+            <div class="stat-box">
+                <h3>Top Threatened Species</h3>
+                <ol>
+                {% for name, cnt in site_stats.top_threats %}
+                    <li>{{ name }} — {{ cnt }} threats</li>
+                {% else %}
+                    <li>No data available</li>
+                {% endfor %}
+                </ol>
+            </div>
+
+            <div class="stat-box">
+                <h3>Number of Species</h3>
+                <div class="stat-value">{{ site_stats.total_species }}</div>
+            </div>
+
+            <div class="stat-box">
+                <h3>Top Locations (most endangered species)</h3>
+                <ol>
+                {% for loc, cnt in site_stats.top_locations %}
+                    <li>{{ loc }} — {{ cnt }} species</li>
+                {% else %}
+                    <li>No data available</li>
+                {% endfor %}
+                </ol>
+            </div>
+
+            <div class="stat-box">
+                <h3>Average threats per species</h3>
+                <div class="stat-value">{{ site_stats.avg_threats_per_species }}</div>
+            </div>
+
+            <div class="stat-box">
+                <h3>Total habitats assigned</h3>
+                <div class="stat-value">{{ site_stats.total_habitat_links }}</div>
+            </div>
+
+            <div class="stat-box">
+                <h3>Location with fewest species</h3>
+                <div class="stat-body">
+                    {% if site_stats.location_with_fewest_species[0] %}
+                        <div class="stat-value">{{ site_stats.location_with_fewest_species[0] }}</div>
+                        <div class="muted">{{ site_stats.location_with_fewest_species[1] }} species</div>
+                    {% else %}
+                        <div class="stat-value">N/A</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="stat-box">
+                <h3>Most common habitat type</h3>
+                <div class="stat-body">
+                    {% if site_stats.most_common_habitat[0] %}
+                        <div class="stat-value">{{ site_stats.most_common_habitat[0] }}</div>
+                        <div class="muted">{{ site_stats.most_common_habitat[1] }} species</div>
+                    {% else %}
+                        <div class="stat-value">N/A</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="about-content">
+        <section class="about-section">
+            <h2>Our Mission</h2>
+            <p>
+                WildGuard is dedicated to raising awareness about endangered species and their conservation needs. 
+                We believe that through education and community action, we can make a real difference in protecting 
+                the world's most vulnerable wildlife populations. Our platform connects people with information about 
+                endangered animals, conservation efforts, and organizations working to save these species from extinction.
+            </p>
+        </section>
+
+        <section class="about-section">
+            <h2>What We Do</h2>
+            <ul class="about-list">
+                <li><strong>Educate:</strong> Provide detailed information about endangered species, their habitats, threats, and conservation status</li>
+                <li><strong>Connect:</strong> Link donors and supporters with reputable conservation organizations</li>
+                <li><strong>Inspire:</strong> Share fun facts and success stories to motivate action</li>
+                <li><strong>Empower:</strong> Offer practical tips on how individuals can contribute to wildlife conservation</li>
+            </ul>
+        </section>
+
+        <section class="about-section">
+            <h2>Our Focus</h2>
+            <p>
+                WildGuard currently focuses on endangered species from the Philippines, a biodiversity hotspot with 
+                many endemic species found nowhere else on Earth. These unique animals face threats from habitat loss, 
+                climate change, poaching, and human development. By highlighting these species, we hope to raise global 
+                awareness and support for their protection.
+            </p>
+        </section>
+
+        <section class="about-section">
+            <h2>How You Can Help</h2>
+            <p>
+                There are many ways to support endangered species conservation:
+            </p>
+            <ul class="about-list">
+                <li>Learn about endangered animals through our platform</li>
+                <li>Donate to verified conservation organizations</li>
+                <li>Support sustainable practices that protect natural habitats</li>
+                <li>Share information with friends and family</li>
+                <li>Advocate for wildlife protection policies</li>
+            </ul>
+        </section>
+    </div>
+</div>
+
+{% endblock %}
