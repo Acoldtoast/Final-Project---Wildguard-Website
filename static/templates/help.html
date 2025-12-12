@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}How You Can Help — WildGuard{% endblock %}
+
+{% block content %}
+	<section class="hero">
+		<h2>How You Can Help</h2>
+		<p class="muted">Small actions make a big difference. Protecting land animals starts with protecting their habitats.</p>
+	</section>
+
+	<section>
+		{% if help_tips %}
+			{% for tip in help_tips %}
+			<div class="help-tip-card">
+				<h3>{{ tip.title }}</h3>
+				
+				<div>
+					<h4>Why it helps:</h4>
+					<p>{{ tip.reason }}</p>
+				</div>
+
+				<div>
+					<h4>What to do:</h4>
+					<ul>
+						{% for action in tip.actions.all() %}
+							{% if action.action_text and action.action_text.strip() %}
+								<li>{{ action.action_text.strip() }}</li>
+							{% endif %}
+						{% endfor %}
+					</ul>
+				</div>
+			</div>
+			{% endfor %}
+		{% else %}
+			<p class="muted">No help tips available yet.</p>
+		{% endif %}
+	</section>
+
+	<section class="help-section">
+		<h3>Together, We Can Make a Difference</h3>
+		<p>Every action counts. Share these tips with your friends and family to amplify the impact.</p>
+		<p>
+			<a href="{{ url_for('pages.donate') }}" class="btn">Support Conservation Organizations</a>
+		</p>
+	</section>
+
+{% endblock %}
