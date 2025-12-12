@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard — WildGuard{% endblock %}
+
+
+{% block content %}
+	<section class="hero">
+		<h2>Admin Dashboard</h2>
+		<p class="muted">Manage species, organizations, articles, news, and conservation data.</p>
+	</section>
+
+	<section>
+		<div class="admin-nav">
+			<a href="#species" class="admin-nav-link active" onclick="switchTab(event, 'species')">Species</a>
+			<a href="#organizations" class="admin-nav-link" onclick="switchTab(event, 'organizations')">Organizations</a>
+			<a href="#help-tips" class="admin-nav-link" onclick="switchTab(event, 'help-tips')">Help Tips</a>
+			<a href="#articles" class="admin-nav-link" onclick="switchTab(event, 'articles')">Articles</a>
+			<a href="#news" class="admin-nav-link" onclick="switchTab(event, 'news')">News</a>
+		</div>
+
+		<!-- SPECIES SECTION -->
+		<div id="species" class="tab-content active">
+			<div class="admin-header">
+				<h3>Species Management</h3>
+				<a href="{{ url_for('admin.manage_species') }}" class="btn">+ Add New Species</a>
+			</div>
+
+			{% if species_list %}
+				<table class="admin-table">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Name</th>
+							<th>Scientific Name</th>
+							<th>Status</th>
+							<th>Population</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for species in species_list %}
+						<tr>
+							<td>{{ species.id }}</td>
+							<td><strong>{{ species.name }}</strong></td>
+							<td><em>{{ species.scientific_name }}</em></td>
+							<td><span class="badge">{{ species.status.status_name if species.status else 'Unknown' }}</span></td>
+							<td>{{ species.population_estimate }}</td>
+							<td>
+								<a href="{{ url_for('admin.manage_species', id=species.id) }}" class="btn btn-small">Edit</a>
+								<form method="POST" action="{{ url_for('admin.delete_species', id=species.id) }}" class="inline-form">
+									<button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Delete this species?')">Delete</button>
+								</form>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			{% else %}
+				<p class="muted">No species found. <a href="{{ url_for('admin.manage_species') }}">Add one now</a>.</p>
+			{% endif %}
+		</div>
+
+		<!-- ORGANIZATIONS SECTION -->
+		<div id="organizations" class="tab-content">
+			<div class="admin-header">
+				<h3>Organizations Management</h3>
+				<a href="{{ url_for('admin.edit_organization') }}" class="btn">+ Add New Organization</a>
+			</div>
+
+			{% if organizations %}
+				<table class="admin-table">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Website</th>
+							<th>About</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for org in organizations %}
+						<tr>
+							<td><strong>{{ org.name }}</strong></td>
+							<td><a href="{{ org.website }}" target="_blank">Visit</a></td>
+							<td>{{ org.about[:80] }}...</td>
+							<td>
+								<a href="{{ url_for('admin.edit_organization', id=org.org_id) }}" class="btn btn-small">Edit</a>
+								<form method="POST" action="{{ url_for('admin.delete_organization', id=org.org_id) }}" class="inline-form">
+									<button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Delete this organization?')">Delete</button>
+								</form>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			{% else %}
+				<p class="muted">No organizations found. <a href="{{ url_for('admin.edit_organization') }}">Add one now</a>.</p>
+			{% endif %}
+		</div>
+
+		<!-- HELP TIPS SECTION -->
+		<div id="help-tips" class="tab-content">
+			<div class="admin-header">
+				<h3>Help Tips Management</h3>
+				<a href="{{ url_for('admin.edit_help_tip') }}" class="btn">+ Add New Help Tip</a>
+			</div>
+
+			{% if help_tips %}
+				<table class="admin-table">
+					<thead>
+						<tr>
+							<th>Title</th>
+							<th>Reason</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for tip in help_tips %}
+						<tr>
+							<td><strong>{{ tip.title }}</strong></td>
+							<td>{{ tip.reason[:80] }}...</td>
+							<td>
+								<a href="{{ url_for('admin.edit_help_tip', id=tip.help_id) }}" class="btn btn-small">Edit</a>
+								<form method="POST" action="{{ url_for('admin.delete_help_tip', id=tip.help_id) }}" class="inline-form">
+									<button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Delete this tip?')">Delete</button>
+								</form>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			{% else %}
+				<p class="muted">No help tips found. <a href="{{ url_for('admin.edit_help_tip') }}">Add one now</a>.</p>
+			{% endif %}
+		</div>
+
+		<!-- ARTICLES SECTION -->
+		<div id="articles" class="tab-content">
+			<div class="admin-header">
+				<h3>Articles Management</h3>
+				<a href="{{ url_for('admin.edit_article') }}" class="btn">+ Add New Article</a>
+			</div>
+
+			{% if articles %}
+				<table class="admin-table">
+					<thead>
+						<tr>
+							<th>Title</th>
+							<th>Category</th>
+							<th>Description</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for article in articles %}
+						<tr>
+							<td><strong>{{ article.title }}</strong></td>
+							<td><span class="badge">{{ article.category }}</span></td>
+							<td>{{ article.description[:80] }}...</td>
+							<td>
+								<a href="{{ url_for('admin.edit_article', id=article.article_id) }}" class="btn btn-small">Edit</a>
+								<form method="POST" action="{{ url_for('admin.delete_article', id=article.article_id) }}" class="inline-form">
+									<button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Delete this article?')">Delete</button>
+								</form>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			{% else %}
+				<p class="muted">No articles found. <a href="{{ url_for('admin.edit_article') }}">Add one now</a>.</p>
+			{% endif %}
+		</div>
+
+		<!-- NEWS SECTION -->
+		<div id="news" class="tab-content">
+			<div class="admin-header">
+				<h3>News Management</h3>
+				<a href="{{ url_for('admin.edit_news') }}" class="btn">+ Add New News Item</a>
+			</div>
+
+			{% if news_items %}
+				<table class="admin-table">
+					<thead>
+						<tr>
+							<th>Title</th>
+							<th>Category</th>
+							<th>Published Date</th>
+							<th>Summary</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for news in news_items %}
+						<tr>
+							<td><strong>{{ news.title }}</strong></td>
+							<td><span class="badge">{{ news.category }}</span></td>
+							<td>{{ news.published_date.strftime('%B %d, %Y') if news.published_date else 'N/A' }}</td>
+							<td>{{ news.summary[:80] }}...</td>
+							<td>
+								<a href="{{ url_for('admin.edit_news', id=news.news_id) }}" class="btn btn-small">Edit</a>
+								<form method="POST" action="{{ url_for('admin.delete_news', id=news.news_id) }}" class="inline-form">
+									<button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Delete this news item?')">Delete</button>
+								</form>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			{% else %}
+				<p class="muted">No news items found. <a href="{{ url_for('admin.edit_news') }}">Add one now</a>.</p>
+			{% endif %}
+		</div>
+	</section>
+
+	<script>
+		function switchTab(e, tabName) {
+			e.preventDefault();
+			
+			// Hide all tab contents
+			const contents = document.querySelectorAll('.tab-content');
+			contents.forEach(content => content.classList.remove('active'));
+			
+			// Remove active class from all links
+			const links = document.querySelectorAll('.admin-nav-link');
+			links.forEach(link => link.classList.remove('active'));
+			
+			// Show the selected tab
+			document.getElementById(tabName).classList.add('active');
+			e.target.classList.add('active');
+		}
+	</script>
+
+	<style>
+		.tab-content {
+			display: none;
+		}
+		.tab-content.active {
+			display: block;
+		}
+	</style>
+
+{% endblock %}
