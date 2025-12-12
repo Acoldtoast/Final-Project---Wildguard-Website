@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ species.name }} — WildGuard{% endblock %}
+
+{% block content %}
+  <button class="btn-back" onclick="history.back()">← Back</button>
+  
+  <section class="hero">
+    <h1>{{ species.name }}</h1>
+    <p class="muted"><em>{{ species.scientific_name }}</em></p>
+  </section>
+
+  <section class="grid">
+    <div class="card" style="grid-column: 1 / -1;">
+      <img src="{{ url_for('static', filename='images/' ~ species.image_file) }}" alt="{{ species.name }}" style="max-width:300px;float:left;margin-right:16px;border-radius:6px;">
+      <p><strong>Status:</strong> {{ species.status.status_name }}<br><em style="color:#666;font-size:0.9em;">{{ species.status.description }}</em></p>
+      <p><strong>Population estimate:</strong> {{ species.population_estimate }}</p>
+      <p>{{ species.description }}</p>
+      <div style="clear:both"></div>
+    </div>
+
+    <div class="card">
+      <h4>Habitats</h4>
+      <ul>
+        {% for h in habitats %}
+          <li>{{ h.habitat_location }}</li>
+        {% else %}
+          <li class="muted">No habitat data.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>Threats</h4>
+      <ul>
+        {% for t in threats %}
+          <li>{{ t.threat_name }}</li>
+        {% else %}
+          <li class="muted">No threat data.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>Fun Facts</h4>
+      <ul>
+        {% for f in facts %}
+          <li>{{ f.fact_detail }}</li>
+        {% else %}
+          <li class="muted">No fun facts.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    {% if species.supported_by %}
+      <div class="card" style="grid-column: 1 / -1;">
+        <h4>Supported By</h4>
+        <ul>
+          {% for org in species.supported_by %}
+            <li><a href="{{ org.website }}" target="_blank">{{ org.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+  </section>
+
+{% endblock %}
