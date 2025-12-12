@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if item %}Edit{% else %}Add{% endif %} {{ item_type|default('Item') }} — WildGuard{% endblock %}
+
+{% block content %}
+	<section class="hero">
+		<h2>{% if item %}Edit {{ item_type|default('Item') }}{% else %}Add New {{ item_type|default('Item') }}{% endif %}</h2>
+		<p class="muted">Fill in all fields to save {{ item_type|default('item') }} information.</p>
+	</section>
+
+	<section>
+		<form method="POST" class="admin-form">
+			{% if form and item_type == 'Species' %}
+				<!-- SPECIES FORM (with WTForms) -->
+				{{ form.hidden_tag() }}
+				
+				<div class="form-group">
+					{{ form.name.label }}
+					{{ form.name(class="form-control") }}
+					{% if form.name.errors %}
+						<div class="errors">
+							{% for error in form.name.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					{{ form.scientific_name.label }}
+					{{ form.scientific_name(class="form-control") }}
+					{% if form.scientific_name.errors %}
+						<div class="errors">
+							{% for error in form.scientific_name.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					{{ form.status.label }}
+					{{ form.status(class="form-control") }}
+					{% if form.status.errors %}
+						<div class="errors">
+							{% for error in form.status.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					{{ form.population_estimate.label }}
+					{{ form.population_estimate(class="form-control") }}
+					{% if form.population_estimate.errors %}
+						<div class="errors">
+							{% for error in form.population_estimate.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					{{ form.description.label }}
+					{{ form.description(rows="8", class="form-control") }}
+					{% if form.description.errors %}
+						<div class="errors">
+							{% for error in form.description.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					{{ form.image_file.label }}
+					{{ form.image_file(class="form-control") }}
+					<small class="muted">Filename only (e.g., philippine_eagle.jpg). Place images in static/images/</small>
+					{% if form.image_file.errors %}
+						<div class="errors">
+							{% for error in form.image_file.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					{{ form.habitats.label }}
+					{{ form.habitats(rows="4", class="form-control", placeholder="Location | Habitat Type\n(e.g., Mindoro | Mountain forests)") }}
+					<small class="muted">One per line. Format: <code>Location | Habitat Type</code></small>
+					{% if form.habitats.errors %}
+						<div class="errors">
+							{% for error in form.habitats.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					{{ form.threats.label }}
+					{{ form.threats(rows="4", class="form-control", placeholder="Habitat loss\nIllegal hunting") }}
+					<small class="muted">One per line</small>
+					{% if form.threats.errors %}
+						<div class="errors">
+							{% for error in form.threats.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					{{ form.fun_facts.label }}
+					{{ form.fun_facts(rows="4", class="form-control") }}
+					<small class="muted">One per line</small>
+					{% if form.fun_facts.errors %}
+						<div class="errors">
+							{% for error in form.fun_facts.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-actions">
+					{{ form.submit(class="btn btn-primary") }}
+					<a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Cancel</a>
+				</div>
+
+			{% elif item_type == 'Organization' %}
+				<!-- ORGANIZATION FORM -->
+				<div class="form-group">
+					<label>Organization Name *</label>
+					<input type="text" name="name" class="form-control" value="{{ item.name if item else '' }}" required>
+				</div>
+
+				<div class="form-group">
+					<label>About (Description) *</label>
+					<textarea name="about" rows="6" class="form-control" required>{{ item.about if item else '' }}</textarea>
+				</div>
+
+				<div class="form-group">
+					<label>Website URL *</label>
+					<input type="url" name="website" class="form-control" value="{{ item.website if item else '' }}" required>
+				</div>
+
+				<div class="form-group">
+					<label>Donation Link</label>
+					<input type="url" name="donate_link" class="form-control" value="{{ item.donate_link if item else '' }}">
+				</div>
+
+				<div class="form-actions">
+					<button type="submit" class="btn btn-primary">Save Organization</button>
+					<a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Cancel</a>
+				</div>
+
+			{% elif item_type == 'Help Tip' %}
+				<!-- HELP TIP FORM -->
+				<div class="form-group">
+					<label>Tip Title *</label>
+					<input type="text" name="title" class="form-control" value="{{ item.title if item else '' }}" required>
+				</div>
+
+				<div class="form-group">
+					<label>Why It Helps (Reason) *</label>
+					<textarea name="reason" rows="4" class="form-control" required>{{ item.reason if item else '' }}</textarea>
+					<small class="muted">Explain why this action helps endangered animals.</small>
+				</div>
+
+				<div class="form-group">
+					<label>What To Do (Actions) *</label>
+					<textarea name="action" rows="6" class="form-control" required>{{ item.action if item else '' }}</textarea>
+					<small class="muted">One action per line. Lines may start with "* " (optional)</small>
+				</div>
+
+				<div class="form-actions">
+					<button type="submit" class="btn btn-primary">Save Help Tip</button>
+					<a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Cancel</a>
+				</div>
+
+			{% elif item_type == 'Related Article' and form %}
+				<!-- RELATED ARTICLE FORM (WTForms) -->
+				{{ form.hidden_tag() }}
+
+				<div class="form-group">
+					{{ form.title.label }}
+					{{ form.title(class="form-control") }}
+					{% if form.title.errors %}
+						<div class="errors">
+							{% for error in form.title.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					{{ form.description.label }}
+					{{ form.description(rows="6", class="form-control") }}
+					<small class="muted">Provide a detailed description (20-1000 characters)</small>
+					{% if form.description.errors %}
+						<div class="errors">
+							{% for error in form.description.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					{{ form.link.label }}
+					{{ form.link(class="form-control") }}
+					<small class="muted">Full URL (e.g., https://example.com)</small>
+					{% if form.link.errors %}
+						<div class="errors">
+							{% for error in form.link.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					{{ form.category.label }}
+					{{ form.category(class="form-control") }}
+					<small class="muted">Choose a category for this article</small>
+					{% if form.category.errors %}
+						<div class="errors">
+							{% for error in form.category.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-actions">
+					{{ form.submit(class="btn btn-primary") }}
+					<a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Cancel</a>
+				</div>
+
+			{% elif item_type == 'News' and form %}
+				<!-- NEWS FORM (WTForms) -->
+				{{ form.hidden_tag() }}
+
+				<div class="form-group">
+					{{ form.title.label }}
+					{{ form.title(class="form-control") }}
+					{% if form.title.errors %}
+						<div class="errors">
+							{% for error in form.title.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					{{ form.summary.label }}
+					{{ form.summary(rows="6", class="form-control") }}
+					<small class="muted">Brief summary of the news (20-1000 characters)</small>
+					{% if form.summary.errors %}
+						<div class="errors">
+							{% for error in form.summary.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					{{ form.link.label }}
+					{{ form.link(class="form-control") }}
+					<small class="muted">Full URL to the news article</small>
+					{% if form.link.errors %}
+						<div class="errors">
+							{% for error in form.link.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					{{ form.category.label }}
+					{{ form.category(class="form-control") }}
+					<small class="muted">Choose a category for this news</small>
+					{% if form.category.errors %}
+						<div class="errors">
+							{% for error in form.category.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-group">
+					{{ form.published_date.label }}
+					{{ form.published_date(class="form-control", type="date") }}
+					<small class="muted">Leave blank for today's date</small>
+					{% if form.published_date.errors %}
+						<div class="errors">
+							{% for error in form.published_date.errors %}<p>{{ error }}</p>{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="form-actions">
+					{{ form.submit(class="btn btn-primary") }}
+					<a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Cancel</a>
+				</div>
+			{% endif %}
+		</form>
+	</section>
+
+{% endblock %}
