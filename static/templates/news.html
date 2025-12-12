@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}News & Updates — WildGuard{% endblock %}
+
+{% block content %}
+	<section class="hero">
+		<h2>News & Updates</h2>
+		<p class="muted">Stay informed about conservation breakthroughs, success stories, and urgent wildlife alerts from around the Philippines.</p>
+	</section>
+
+	<section>
+		{% if news_items %}
+		<div class="news-container">
+			{% for news in news_items %}
+			<div class="news-card">
+				<div class="news-meta">
+					<span class="badge badge-{{ 'success' if news.category == 'Success Story' else 'danger' if news.category == 'Alert' else 'info' }}">
+						{{ news.category }}
+					</span>
+					{% if news.published_date %}
+					<span class="published-date">{{ news.published_date.strftime('%B %d, %Y') }}</span>
+					{% endif %}
+				</div>
+				<h3>{{ news.title }}</h3>
+				<p class="news-summary">{{ news.summary }}</p>
+				<a href="{{ news.link }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+					Read Full Story →
+				</a>
+			</div>
+			{% endfor %}
+		</div>
+		{% else %}
+		<p class="alert alert-info">No news items available at this time.</p>
+		{% endif %}
+	</section>
+
+{% endblock %}
