@@ -48,6 +48,7 @@ def update_list(table, species_id, items, column, max_length=None):
 
         # SpeciesHabitat expects a "Location | HabitatType" format (or "Location - HabitatType").
         if table is SpeciesHabitat:
+            # Parse possible separators
             if '|' in item:
                 loc_name, hab_name = [p.strip() for p in item.split('|', 1)]
             elif '-' in item:
@@ -95,13 +96,16 @@ def manage_species(id=None):
 
     species = Species.query.get(id) if id else None
     
+    # Always set status choices first, before form instantiation
     status_choices = [(s.status_name, s.status_name) for s in ConservationStatus.query.all()]
     
     if request.method == "GET" and species:
+        # Build habitats as "Location | HabitatType"
         habitats_text = "\n".join([
             f"{(Location.query.get(h.location_id).location_name if Location.query.get(h.location_id) else '')} | {(HabitatType.query.get(h.habitat_type_id).habitat_name if HabitatType.query.get(h.habitat_type_id) else '')}"
             for h in species.habitats.all()
         ])
+        # Build threats from Threat table
         threats_text = "\n".join([
             (Threat.query.get(t.threat_id).threat_name if Threat.query.get(t.threat_id) else '')
             for t in species.threats.all()
@@ -117,23 +121,22 @@ def manage_species(id=None):
     form.status.choices = status_choices
 
     if form.validate_on_submit():
-
-        is_new = False
         if not species:
             species = Species()
-            is_new = True
+            db.session.add(species)
 
         species.name = form.name.data
         species.scientific_name = form.scientific_name.data
+        # status field holds the status_name; convert to status_id
         status = ConservationStatus.query.filter_by(status_name=form.status.data).first()
         if status:
             species.status_id = status.status_id
+        else:
+            # fallback: leave unchanged
+            pass
         species.population_estimate = form.population_estimate.data
         species.description = form.description.data
         species.image_file = form.image_file.data
-
-        if is_new:
-            db.session.add(species)
 
         db.session.flush()
         update_list(SpeciesHabitat, species.id, form.habitats.data, "habitat_location", 250)
@@ -193,7 +196,7 @@ def edit_organization(id=None):
         
         db.session.commit()
         flash("Organization saved successfully.", "success")
-        return redirect(url_for("admin.manage_organizations"))
+        return redirect(url_for("admin.dashboard"))
     
     return render_template("admin_edit.html", item=org, item_type="Organization")
 
@@ -205,7 +208,7 @@ def delete_organization(id):
     db.session.delete(org)
     db.session.commit()
     flash("Organization deleted.", "info")
-    return redirect(url_for("admin.manage_organizations"))
+    return redirect(url_for("admin.dashboard"))
 
 
 # --- HELP TIPS MANAGEMENT ---
@@ -222,8 +225,10 @@ def manage_help_tips():
 @admin_required
 def edit_help_tip(id=None):
     tip = HelpTip.query.get(id) if id else None
+    # On GET, build a newline-separated actions string for the textarea
     if request.method == "GET" and tip:
         actions_text = "\n".join([a.action_text for a in tip.actions.order_by(HelpTipAction.action_id).all()])
+        # temporarily attach for template rendering
         tip.action = actions_text
 
     if request.method == "POST":
@@ -238,18 +243,20 @@ def edit_help_tip(id=None):
         if not tip:
             tip = HelpTip(title=title, reason=reason)
             db.session.add(tip)
-            db.session.commit()  
+            db.session.commit()  # commit to get help_id for actions
         else:
             tip.title = title
             tip.reason = reason
             db.session.add(tip)
             db.session.commit()
 
+        # Replace existing actions with provided ones
         HelpTipAction.query.filter_by(tip_id=tip.help_id).delete()
         for line in actions_raw.splitlines():
             text = line.strip()
             if not text:
                 continue
+            # allow lines starting with "* "
             if text.startswith('* '):
                 text = text[2:].strip()
             if text:
@@ -257,7 +264,7 @@ def edit_help_tip(id=None):
 
         db.session.commit()
         flash("Help tip saved successfully.", "success")
-        return redirect(url_for("admin.manage_help_tips"))
+        return redirect(url_for("admin.dashboard"))
 
     return render_template("admin_edit.html", item=tip, item_type="Help Tip")
 
@@ -269,7 +276,7 @@ def delete_help_tip(id):
     db.session.delete(tip)
     db.session.commit()
     flash("Help tip deleted.", "info")
-    return redirect(url_for("admin.manage_help_tips"))
+    return redirect(url_for("admin.dashboard"))
 
 
 # --- RELATED ARTICLES MANAGEMENT ---
@@ -300,9 +307,9 @@ def edit_article(id=None):
         
         db.session.commit()
         flash("Article saved successfully.", "success")
-        return redirect(url_for("admin.manage_articles"))
+        return redirect(url_for("admin.dashboard"))
     
-    return render_template("admin_edit.html", form=form, article=article, item_type="Related Article")
+    return render_template("admin_edit.html", form=form, item=article, item_type="Related Article")
 
 
 @admin.route("/admin/article/delete/<int:id>", methods=["POST"])
@@ -312,7 +319,7 @@ def delete_article(id):
     db.session.delete(article)
     db.session.commit()
     flash("Article deleted.", "info")
-    return redirect(url_for("admin.manage_articles"))
+    return redirect(url_for("admin.dashboard"))
 
 
 # --- NEWS MANAGEMENT ---
@@ -320,6 +327,7 @@ def delete_article(id):
 @admin.route("/admin/news")
 @admin_required
 def manage_news():
+    # order news by published_date (more meaningful) — fall back to news_id column if needed
     news_items = News.query.order_by(News.published_date.desc()).all()
     return render_template("admin_news.html", news_items=news_items)
 
@@ -344,9 +352,9 @@ def edit_news(id=None):
         
         db.session.commit()
         flash("News saved successfully.", "success")
-        return redirect(url_for("admin.manage_news"))
+        return redirect(url_for("admin.dashboard"))
     
-    return render_template("admin_edit.html", form=form, news_item=news_item, item_type="News")
+    return render_template("admin_edit.html", form=form, item=news_item, item_type="News")
 
 
 @admin.route("/admin/news-item/delete/<int:id>", methods=["POST"])
@@ -356,4 +364,4 @@ def delete_news(id):
     db.session.delete(news_item)
     db.session.commit()
     flash("News deleted.", "info")
-    return redirect(url_for("admin.manage_news"))
+    return redirect(url_for("admin.dashboard"))
