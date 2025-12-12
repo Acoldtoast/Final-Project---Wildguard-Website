@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Organizations — WildGuard{% endblock %}
+
+{% block content %}
+	<section class="hero">
+		<h2>Admin Dashboard</h2>
+		<p class="muted">Manage species, organizations, and conservation data.</p>
+	</section>
+
+	<section>
+		<div class="admin-nav">
+			<a href="{{ url_for('admin.dashboard') }}" class="admin-nav-link">Species</a>
+			<a href="{{ url_for('admin.manage_organizations') }}" class="admin-nav-link active">Organizations</a>
+			<a href="{{ url_for('admin.manage_help_tips') }}" class="admin-nav-link">Help Tips</a>
+		</div>
+
+		<div class="admin-header">
+			<h3>Organizations Management</h3>
+			<a href="{{ url_for('admin.edit_organization') }}" class="btn">+ Add New Organization</a>
+		</div>
+
+		{% if organizations %}
+			<table class="admin-table">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Name</th>
+						<th>Website</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for org in organizations %}
+					<tr>
+						<td>{{ org.org_id }}</td>
+						<td><strong>{{ org.name }}</strong></td>
+						<td><a href="{{ org.website }}" target="_blank" style="color: #2ecc71;">Visit</a></td>
+						<td>
+							<a href="{{ url_for('admin.edit_organization', id=org.org_id) }}" class="btn btn-small">Edit</a>
+							<form method="POST" action="{{ url_for('admin.delete_organization', id=org.org_id) }}" class="inline-form">
+								<button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Delete this organization?')">Delete</button>
+							</form>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		{% else %}
+			<p class="muted">No organizations found. <a href="{{ url_for('admin.edit_organization') }}">Add one now</a>.</p>
+		{% endif %}
+	</section>
+
+{% endblock %}
