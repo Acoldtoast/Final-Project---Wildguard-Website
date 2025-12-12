@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Wildlife Directory — WildGuard{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <h2>Wildlife Directory</h2>
+    <p class="muted">Browse species in our database.</p>
+  </section>
+
+  <section>
+    <div class="grid">
+      {% for s in species_list %}
+        <div class="card">
+          <img src="{{ url_for('static', filename='images/' ~ s.image_file) }}" alt="{{ s.name }}" style="width:100%;height:140px;object-fit:cover;border-radius:6px;margin-bottom:8px;">
+          <h3>{{ s.name }}</h3>
+          <p class="muted"><em>{{ s.scientific_name }}</em></p>
+          <p class="muted">Status: <strong>{{ s.status.status_name }}</strong><br><span style="font-size:0.85em;">{{ s.status.description }}</span></p>
+          <p><a href="{{ url_for('animals.animal_detail', species_id=s.id) }}" class="btn">View</a></p>
+        </div>
+      {% else %}
+        <p class="muted">No species found.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+{% endblock %}
