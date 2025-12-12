@@ -1,4 +1,4 @@
--- seed.sql (full normalized - corrected for SQLite)
+-- seed.sql
 PRAGMA foreign_keys = ON;
 
 -- 1) Conservation statuses
