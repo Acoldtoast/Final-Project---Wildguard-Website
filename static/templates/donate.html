@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Donate — WildGuard{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h2>Support Conservation</h2>
+    <p class="muted">Your donation helps organizations protect endangered species in the Philippines.</p>
+</section>
+
+<section class="donation-partners">
+    <div class="donation-header">
+        <h3>Conservation Partners</h3>
+        <p style="margin-bottom: 0;">Meet the organizations working tirelessly to protect Philippine wildlife. Choose an organization and support their conservation efforts.</p>
+    </div>
+
+<div class="grid">
+    {% for org in organizations %}
+    <div class="card">
+        <h4>{{ org.name }}</h4>
+        <p class="muted">{{ org.about }}</p>
+        <p style="font-size: 0.9rem; margin: 1rem 0;">
+            <strong>Website:</strong><br>
+            <a href="{{ org.website }}" target="_blank" style="color: #2ecc71;">{{ org.website }}</a>
+        </p>
+        <p>
+            <a href="{{ org.donate_link }}" target="_blank" class="btn">Donate Now</a>
+        </p>
+    </div>
+    {% endfor %}
+</div>
+</section>
+
+<section class="donation-info">
+    <h3>Why Your Donation Matters</h3>
+    <ul>
+        <li><strong>Habitat Protection:</strong> Your support funds forest conservation and protected area management.</li>
+        <li><strong>Breeding Programs:</strong> Help organizations breed endangered species in captivity for future reintroduction.</li>
+        <li><strong>Community Education:</strong> Donations support outreach programs that reduce hunting and wildlife trafficking.</li>
+        <li><strong>Research:</strong> Fund scientific studies that help us better understand and protect species.</li>
+        <li><strong>Anti-Poaching Efforts:</strong> Support patrols and enforcement to prevent illegal hunting and trafficking.</li>
+    </ul>
+</section>
+
+{% endblock %}
