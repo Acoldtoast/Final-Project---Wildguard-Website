@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}WildGuard{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+  </head>
+ <body>
+    <header>
+      <div class="container nav">
+        <div class="brand">
+          <div class="brand">
+            <img src="/static/images/logo.png" alt="WildGuard Logo" class="brand-logo">
+            <span>WildGuard</span>
+          </div>
+        <nav class="nav-links">
+          <a href="{{ url_for('pages.home') }}">Home</a>
+          <a href="{{ url_for('pages.about') }}">About</a>
+          <a href="{{ url_for('animals.list_animals') }}">Wildlife</a>
+          <a href="{{ url_for('pages.articles') }}">Articles</a>
+          <a href="{{ url_for('pages.news') }}">News</a>
+          <a href="{{ url_for('pages.donate') }}">Organizations</a>
+          <a href="{{ url_for('pages.help_page') }}">Help</a>
+          {% if current_user.is_authenticated %}
+            {% if current_user.is_admin %}
+              <a href="{{ url_for('admin.dashboard') }}">Admin</a>
+            {% endif %}
+            <a href="{{ url_for('auth.logout') }}" class="btn secondary">Logout</a>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, msg in messages %}
+            <div class="flash">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>About</h3>
+          <ul>
+            <li><a href="{{ url_for('pages.home') }}">Home</a></li>
+            <li><a href="{{ url_for('pages.about') }}">About Us</a></li>
+            <li><a href="{{ url_for('pages.donate') }}">Organizations</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Content</h3>
+          <ul>
+            <li><a href="{{ url_for('pages.articles') }}">Articles</a></li>
+            <li><a href="{{ url_for('pages.news') }}">News</a></li>
+            <li><a href="{{ url_for('animals.list_animals') }}">Wildlife</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Resources</h3>
+          <ul>
+            <li><a href="{{ url_for('pages.help_page') }}">Help</a></li>
+            <li><a href="{{ url_for('pages.sources') }}">Sources</a></li>
+            <li><a href="#" id="footer-contact-link">Contact</a></li>
+            <li><a href="#" id="footer-privacy-link">Privacy Policy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© {{ current_year or "2025" }} WildGuard — Protecting wildlife</p>
+      </div>
+    </footer>
+
+    <!-- Infographics -->
+    <script src="{{ url_for('static', filename='javascript/script.js') }}"></script>
+    <div id="img-modal" class="img-modal" aria-hidden="true">
+      <div class="img-modal-backdrop" tabindex="-1"></div>
+      <div class="img-modal-content" role="dialog" aria-modal="true">
+        <button id="img-modal-close" class="btn btn-secondary">Close</button>
+        <img id="img-modal-img" src="" alt="" />
+        <div id="img-modal-caption" style="margin-top:8px;color:var(--muted)"></div>
+      </div>
+    </div>
+    <!-- Contact Modal -->
+    <div id="contact-modal" class="contact-modal" aria-hidden="true">
+      <div class="contact-modal-backdrop" tabindex="-1"></div>
+      <div class="contact-modal-content" role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
+        <button id="contact-modal-close" class="contact-modal-close">Close</button>
+        <h4 id="contact-modal-title">Contact WildGuard</h4>
+        <div class="contact-row"><span class="contact-label">Name</span><span>WildGuard Team</span></div>
+        <div class="contact-row"><span class="contact-label">Social</span><span>@WildGuardPH / facebook.com/WildGuardPH</span></div>
+        <div class="contact-row"><span class="contact-label">Phone</span><span>+63 912 345 6789</span></div>
+        <p style="margin-top:12px;color:var(--muted);font-size:0.95rem">For partnership or media inquiries, email <a href="mailto:info@wildguard.ph">info@wildguard.ph</a>.</p>
+      </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacy-modal" class="contact-modal" aria-hidden="true">
+      <div class="contact-modal-backdrop" tabindex="-1"></div>
+      <div class="contact-modal-content" role="dialog" aria-modal="true" aria-labelledby="privacy-modal-title" style="max-width:500px;max-height:80vh;overflow-y:auto">
+        <button id="privacy-modal-close" class="contact-modal-close">Close</button>
+        <h4 id="privacy-modal-title">Privacy Policy</h4>
+        <p><strong>Last Updated:</strong> December 2025</p>
+        <p><strong>1. Information We Collect</strong><br>WildGuard collects information about endangered species, conservation efforts, and user interactions to provide educational content and conservation resources.</p>
+        <p><strong>2. How We Use Your Data</strong><br>Your information is used to improve site functionality, send updates about wildlife conservation, and support our mission. We do not sell user data to third parties.</p>
+        <p><strong>3. Data Protection</strong><br>We implement industry-standard security measures to protect your information. All data is treated with confidentiality and used only as described in this policy.</p>
+        <p><strong>4. Cookies & Tracking</strong><br>WildGuard uses cookies to enhance user experience. You can control cookie settings through your browser preferences.</p>
+        <p><strong>5. Third-Party Links</strong><br>Our site contains links to external conservation organizations. We are not responsible for their privacy practices. Review their policies independently.</p>
+        <p><strong>6. Children's Privacy</strong><br>WildGuard does not knowingly collect data from children under 13. If we discover such collection, we will delete the information immediately.</p>
+        <p><strong>7. Policy Changes</strong><br>We may update this policy periodically. Changes will be posted here with an updated date. Continued use of the site indicates acceptance of the revised policy.</p>
+        <p><strong>8. Contact Us</strong><br>For privacy inquiries, email <a href="mailto:info@wildguard.ph">info@wildguard.ph</a> or use our Contact form.</p>
+      </div>
+    </div>
+  </body>
+</html>
+
+{% block extra_js %}{% endblock %}
