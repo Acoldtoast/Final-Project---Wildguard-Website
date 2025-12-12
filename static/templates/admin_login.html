@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login - WildGuard{% endblock %}
+
+{% block content %}
+    <div style="max-width:480px;margin:48px auto;">
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            <h2 style="margin-bottom:8px;">Admin Login</h2>
+            <p class="muted">Sign in to manage WildGuard content</p>
+
+            <div class="form-row">
+                {{ form.username.label }}
+                {{ form.username(class="") }}
+                {% if form.username.errors %}
+                    <div class="muted">{% for e in form.username.errors %}{{ e }} {% endfor %}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                {{ form.password.label }}
+                {{ form.password(class="") }}
+                {% if form.password.errors %}
+                    <div class="muted">{% for e in form.password.errors %}{{ e }} {% endfor %}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                {{ form.submit(class="btn") }}
+            </div>
+        </form>
+    </div>
+
+{% endblock %}
