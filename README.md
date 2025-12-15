@@ -1,3 +1,13 @@
+## Project Details
+
+Submitted by : Group 4 - BSIT 2103
+- Ona, Ivy Noelle Marie M. - Leader / Backend Leader
+- Capili, Naja Ysabel J. - Documentation Leader
+- Hernandez, Jessica M. - Research Leader
+- Valenzuela, Justin Andrei H. - Frontend (GUI) Leader
+
+---
+
 ## Technologies Used
 - Python
 - Flask
@@ -19,3 +29,5 @@ pip install -r requirements.txt
 
 # 4. Run the app
 python app.py
+
+---
