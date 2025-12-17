@@ -132,16 +132,20 @@ def manage_species(id=None):
         if status:
             species.status_id = status.status_id
         else:
-            # fallback: leave unchanged
-            pass
-        species.population_estimate = form.population_estimate.data
-        species.description = form.description.data
-        species.image_file = form.image_file.data
+            flash("Please select a valid conservation status.", "danger")
+            return redirect(url_for("admin.manage_species"))
+
+        # Ensure non-None values for fields that are NOT NULL in the DB
+        species.population_estimate = form.population_estimate.data or ""
+        species.description = form.description.data or ""
+        species.image_file = form.image_file.data or "default_species.jpg"
 
         db.session.flush()
-        update_list(SpeciesHabitat, species.id, form.habitats.data, "habitat_location", 250)
-        update_list(SpeciesThreat, species.id, form.threats.data, "threat_name", 150)
-        update_list(SpeciesFunFact, species.id, form.fun_facts.data, "fact_detail")
+        # Prevent autoflush from running when update_list executes queries
+        with db.session.no_autoflush:
+            update_list(SpeciesHabitat, species.id, form.habitats.data, "habitat_location", 250)
+            update_list(SpeciesThreat, species.id, form.threats.data, "threat_name", 150)
+            update_list(SpeciesFunFact, species.id, form.fun_facts.data, "fact_detail")
 
         db.session.commit()
         flash("Saved successfully.", "success")

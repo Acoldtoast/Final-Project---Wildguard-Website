@@ -72,9 +72,9 @@ class Species(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True, index=True)
     scientific_name = db.Column(db.String(100), nullable=False)
-    population_estimate = db.Column(db.String(100), nullable=False)
+    population_estimate = db.Column(db.String(100), nullable=True)
     description = db.Column(db.Text, nullable=False)
-    image_file = db.Column(db.String(100), default='default_species.jpg')
+    image_file = db.Column(db.String(100), default='default_species.jpg', nullable=False)
     status_id = db.Column(db.Integer, db.ForeignKey('conservation_status.status_id'), nullable=False)
 
     habitats = db.relationship('SpeciesHabitat', backref='species', cascade="all, delete-orphan", lazy='dynamic')
