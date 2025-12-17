@@ -121,14 +121,17 @@ def manage_species(id=None):
     form.status.choices = status_choices
 
     if form.validate_on_submit():
+        creating = False
         if not species:
             species = Species()
-            db.session.add(species)
+            creating = True
 
         species.name = form.name.data
         species.scientific_name = form.scientific_name.data
         # status field holds the status_name; convert to status_id
-        status = ConservationStatus.query.filter_by(status_name=form.status.data).first()
+        # Lookup status inside no_autoflush to avoid flushing any pending objects
+        with db.session.no_autoflush:
+            status = ConservationStatus.query.filter_by(status_name=form.status.data).first()
         if status:
             species.status_id = status.status_id
         else:
@@ -140,13 +143,29 @@ def manage_species(id=None):
         species.description = form.description.data or ""
         species.image_file = form.image_file.data or "default_species.jpg"
 
-        db.session.flush()
-        # Prevent autoflush from running when update_list executes queries
+        # If creating a new species, add it to the session only after fields are set
+        if creating:
+            db.session.add(species)
+
+        # Ensure we have a valid status record; if none found, create a fallback
+        if not species.status_id:
+            fallback = ConservationStatus.query.first()
+            if not fallback:
+                fallback = ConservationStatus(status_name='Unknown', description='Fallback status')
+                db.session.add(fallback)
+                db.session.commit()
+            species.status_id = fallback.status_id
+
+        # Persist the species first so we have an ID for related tables
+        db.session.commit()
+
+        # Now update related lists. Wrap in no_autoflush to avoid premature autoflush
         with db.session.no_autoflush:
             update_list(SpeciesHabitat, species.id, form.habitats.data, "habitat_location", 250)
             update_list(SpeciesThreat, species.id, form.threats.data, "threat_name", 150)
             update_list(SpeciesFunFact, species.id, form.fun_facts.data, "fact_detail")
 
+        # Final commit for the related items
         db.session.commit()
         flash("Saved successfully.", "success")
         return redirect(url_for("admin.dashboard"))
